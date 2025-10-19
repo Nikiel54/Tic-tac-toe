@@ -1,4 +1,6 @@
 // Game logic
+const P1COLOUR = "#8A2BE2";
+const P2COLOUR = "#00FFFF";
 
 const gameBoard = (() => {
     const length = 3;
@@ -124,7 +126,10 @@ const gameController = (() => {
         }
     }
 
-    const whoAmI = () => { console.log(`Current player: ${currPlayer.name}`); };
+    const whoAmI = () => { 
+        console.log(`Current player: ${currPlayer.name}`);
+        return currPlayer.playerType;
+    };
 
     const reset = () => {
         movesMade = 0;
@@ -139,18 +144,30 @@ const gameController = (() => {
 })();
 
 
-gameController.whoAmI()
-gameController.playMove(0, 0);
-gameController.whoAmI()
-gameController.playMove(0, 1);
-gameController.whoAmI()
-gameController.playMove(1, 1);
-gameController.whoAmI()
-gameController.playMove(0, 2);
-gameController.whoAmI()
-gameController.playMove(2, 2);
-gameController.whoAmI()
-gameController.playMove(1, 1);
+const cells = document.querySelectorAll(".cell[data-id]");
+cells.forEach((cell) => {
+    const index = +cell.getAttribute("data-id");
+    let rowIndex = Math.floor(index / 3);
+    if (rowIndex === 3) {
+        rowIndex--;
+    }
+    const colIndex = index % 3;
+
+    cell.addEventListener('click', () => {
+        const playerSignature = gameController.whoAmI()
+        gameController.playMove(rowIndex, colIndex);
+
+        const moveMade = document.createElement('h1');
+        moveMade.textContent = playerSignature;
+        if (playerSignature == 'X') {
+            moveMade.style.color = P1COLOUR;
+        } else {
+            moveMade.style.color = P2COLOUR;
+        }
+
+        cell.appendChild(moveMade);
+    })
+})
 
 
 

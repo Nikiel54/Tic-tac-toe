@@ -1,0 +1,51 @@
+:root {
+    box-sizing: border-box;
+    font-family: "Orbitron", "Courier New", "Times New Roman"
+}
+
+h1, h2, h3, h4, p {
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 600px;
+    background-color: #000000;
+}
+
+#game-title {
+    color: #FF33CC;
+    font-size: 60px;
+    margin: 30px;
+    font-weight: 500;
+    text-shadow: 2px 2px 3px #FF33CC;
+}
+
+#game-grid {
+    width: 500px;
+    height: 500px;
+    display: grid;
+    grid-template-columns: 1fr 3px 1fr 3px 1fr;
+    grid-template-rows: 1fr 3px 1fr 3px 1fr;
+}
+
+.border {
+    background-color: #00AA00;
+    border-radius: 5px;
+}
+
+.cell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+}
+
+.cell > h1 {
+    font-weight: 200;
+}

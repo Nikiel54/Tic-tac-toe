@@ -54,11 +54,7 @@ const gameBoard = (() => {
     }
 
     const move = (row, col, playerType) => {
-        // checking if valid move
-        if (!(Board[row][col] === '.')) {
-            console.log("Error: Invalid move!");
-            return false;
-        }
+        // assumes valid moves only
 
         Board[row][col] = playerType; // make move
 
@@ -69,7 +65,16 @@ const gameBoard = (() => {
         return false;
     }
 
+    const checkValidMove = (row, col) => {
+        if (!(Board[row][col] === '.')) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     return {
+        checkValidMove,
         move,
         displayBoard,
         resetBoard,
@@ -91,6 +96,14 @@ const gameController = (() => {
     let currPlayer = player1;
     
     const playMove = (row, col) => {
+        const canMove = gameBoard.checkValidMove(row, col);
+
+        // early termination
+        if (!canMove) {
+            console.log("Error: Invalid move!");
+            return;
+        }
+
         const win = gameBoard.move(row, col, currPlayer.playerType);
         movesMade++;
         gameBoard.displayBoard();

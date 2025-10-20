@@ -144,51 +144,94 @@ const gameController = (() => {
 })();
 
 
-const cells = document.querySelectorAll(".cell[data-id]");
-const borders = document.querySelectorAll(".border");
-const turnDisplay = document.getElementById("turn-display");
 
-function setBorderColour(colour) {
-    borders.forEach((border) => {
-        border.style["background-color"] = colour;
-    })
-}
+const displayController = (() => {
+    const cells = document.querySelectorAll(".cell[data-id]");
+    const borders = document.querySelectorAll(".border");
+    const turnDisplay = document.getElementById("turn-display");
 
-function updateTurnDisplay(name, colour) {
-    const displayMsg = `Player ${name}'s Turn`;
-    turnDisplay.textContent = displayMsg;
-    turnDisplay.style.color = colour;
-}
+    // private functions
+    const flashCell = (row, col) => {
+        const ind = row * 3 + col;
+        const reqdCell = document.querySelector(`.cell[data-id="${ind}"]`);
 
-cells.forEach((cell) => {
-    const index = +cell.getAttribute("data-id");
-    let rowIndex = Math.floor(index / 3);
-    const colIndex = index % 3;
+        reqdCell.classList.add("flash");
+        setTimeout(() => {
+            reqdCell.classList.remove("flash");
+        }, 300);
+    }
 
-    cell.addEventListener('click', () => {
-        // ignore plays since filled already
-        if (cell.textContent !== "") {
-            return;
+
+    const updateCell = (row, col, symbol, colour) => {
+        const ind = row * 3 + col;
+        const reqdCell = document.querySelector(`.cell[data-id="${ind}"]`);
+
+        if (reqdCell.textContent !== '') {
+            flashCell(row, col);
+            throw("Error: Invalid Placement!");
         }
 
-        const player = gameController.whoAmI()
+        reqdCell.textContent = symbol;
+        reqdCell.style.color = colour;
+    }
 
-        const playerSymbol = player.playerType;
-        const colour = playerSymbol === 'X' ? P1COLOUR : P2COLOUR;
+    const setBorderColour = (colour) => {
+        borders.forEach((border) => {
+            border.style["background-color"] = colour;
+        })
+    }
 
-        // update UI elements
-        cell.textContent = playerSymbol;
-        cell.style.color = colour;
-        
-        // changing border colour
-        const newColour = colour === P1COLOUR ? P2COLOUR : P1COLOUR;
-        setBorderColour(newColour);
+    const updateTurnDisplay = (name, colour) => {
+        const displayMsg = `Player ${name}'s Turn`;
+        turnDisplay.textContent = displayMsg;
+        turnDisplay.style.color = colour;
+    }
 
-        gameController.playMove(rowIndex, colIndex);
-        const newPlayer = gameController.whoAmI();
-        updateTurnDisplay(newPlayer.name, newColour);
-    })
-})
+    const clearBoard = () => {
+        cells.forEach((cell) => {
+            cell.textContent = '';
+            cell.style.color = '';
+        })
+    }
+
+
+    // Public functions
+    const setEventListeners = () => {
+        cells.forEach((cell) => {
+            const index = +cell.getAttribute("data-id");
+            const rowIndex = Math.floor(index / 3);
+            const colIndex = index % 3;
+
+            cell.addEventListener('click', () => {
+                const player = gameController.whoAmI()
+
+                const playerSymbol = player.playerType;
+                const colour = playerSymbol === 'X' ? P1COLOUR : P2COLOUR;
+
+                updateCell(rowIndex, colIndex, playerSymbol, colour);
+
+                const newColour = colour === P1COLOUR ? P2COLOUR : P1COLOUR;
+                setBorderColour(newColour);
+
+                gameController.playMove(rowIndex, colIndex);
+
+                const newPlayer = gameController.whoAmI();
+                updateTurnDisplay(newPlayer.name, newColour);
+            })
+        })
+    }
+
+
+    return {
+        clearBoard,
+        setEventListeners,
+    }
+})();
+
+
+
+displayController.setEventListeners();
+
 
 
 /*

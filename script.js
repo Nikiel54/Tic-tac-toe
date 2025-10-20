@@ -90,7 +90,7 @@ function Player(name, playerType) {
 }
 
 const gameController = (() => {
-    const player1 = new Player('Me', 'X');
+    const player1 = new Player('Toad', 'X');
     const player2 = new Player('Jacob', 'O');
     let movesMade = 0;
     const maxMoves = 9;
@@ -128,7 +128,7 @@ const gameController = (() => {
 
     const whoAmI = () => { 
         console.log(`Current player: ${currPlayer.name}`);
-        return currPlayer.playerType;
+        return currPlayer;
     };
 
     const reset = () => {
@@ -145,30 +145,61 @@ const gameController = (() => {
 
 
 const cells = document.querySelectorAll(".cell[data-id]");
+const borders = document.querySelectorAll(".border");
+const turnDisplay = document.getElementById("turn-display");
+
+function setBorderColour(colour) {
+    borders.forEach((border) => {
+        border.style["background-color"] = colour;
+    })
+}
+
+function updateTurnDisplay(name, colour) {
+    const displayMsg = `Player ${name}'s Turn`;
+    turnDisplay.textContent = displayMsg;
+    turnDisplay.style.color = colour;
+}
+
 cells.forEach((cell) => {
     const index = +cell.getAttribute("data-id");
     let rowIndex = Math.floor(index / 3);
-    if (rowIndex === 3) {
-        rowIndex--;
-    }
     const colIndex = index % 3;
 
     cell.addEventListener('click', () => {
-        const playerSignature = gameController.whoAmI()
-        gameController.playMove(rowIndex, colIndex);
-
-        const moveMade = document.createElement('h1');
-        moveMade.textContent = playerSignature;
-        if (playerSignature == 'X') {
-            moveMade.style.color = P1COLOUR;
-        } else {
-            moveMade.style.color = P2COLOUR;
+        // ignore plays since filled already
+        if (cell.textContent !== "") {
+            return;
         }
 
-        cell.appendChild(moveMade);
+        const player = gameController.whoAmI()
+
+        const playerSymbol = player.playerType;
+        const colour = playerSymbol === 'X' ? P1COLOUR : P2COLOUR;
+
+        // update UI elements
+        cell.textContent = playerSymbol;
+        cell.style.color = colour;
+        
+        // changing border colour
+        const newColour = colour === P1COLOUR ? P2COLOUR : P1COLOUR;
+        setBorderColour(newColour);
+
+        gameController.playMove(rowIndex, colIndex);
+        const newPlayer = gameController.whoAmI();
+        updateTurnDisplay(newPlayer.name, newColour);
     })
 })
 
+
+/*
+gameController.whoAmI();
+gameController.playMove(2, 2);
+gameController.whoAmI();
+gameController.playMove(1, 2);
+gameController.whoAmI();
+gameController.playMove(0, 2);
+gameController.whoAmI();
+*/
 
 
 

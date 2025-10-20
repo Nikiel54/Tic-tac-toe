@@ -1,6 +1,8 @@
 // Game logic
 const P1COLOUR = "#8A2BE2";
 const P2COLOUR = "#00FFFF";
+const WINCLR = "#FFD700";
+const DRAWCLR = "#C0C0C0";
 
 const gameBoard = (() => {
     const length = 3;
@@ -98,23 +100,23 @@ const gameController = (() => {
     let currPlayer = player1;
     
     const playMove = (row, col) => {
-        const canMove = gameBoard.checkValidMove(row, col);
-
-        // early termination
-        if (!canMove) {
-            console.log("Error: Invalid move!");
-            return;
-        }
-
         const win = gameBoard.move(row, col, currPlayer.playerType);
         movesMade++;
         gameBoard.displayBoard();
 
         if (win) {
             console.log(`Player ${currPlayer.name} wins!!!\n`);
+            return {
+                win: win,
+                draw: false,
+            }
         }
         else if (movesMade >= maxMoves) {
             console.log("Both Players Draw!!!");
+            return {
+                win: false,
+                draw: true,
+            }
         }
         else {
             // switching players
@@ -122,6 +124,10 @@ const gameController = (() => {
                 currPlayer = player2;
             } else {
                 currPlayer = player1;
+            }
+            return {
+                win: false,
+                draw: false,
             }
         }
     }
@@ -132,6 +138,7 @@ const gameController = (() => {
     };
 
     const reset = () => {
+        currPlayer = player1;
         movesMade = 0;
         gameBoard.resetBoard();
     }
@@ -150,15 +157,21 @@ const displayController = (() => {
     const borders = document.querySelectorAll(".border");
     const turnDisplay = document.getElementById("turn-display");
 
+    // game states
+    let inPlay = true;
+    let gameWin = false;
+    let gameDraw = false;
+
     // private functions
     const flashCell = (row, col) => {
         const ind = row * 3 + col;
         const reqdCell = document.querySelector(`.cell[data-id="${ind}"]`);
+        const flashTime = 300; //ms
 
         reqdCell.classList.add("flash");
         setTimeout(() => {
             reqdCell.classList.remove("flash");
-        }, 300);
+        }, flashTime);
     }
 
 
@@ -168,11 +181,13 @@ const displayController = (() => {
 
         if (reqdCell.textContent !== '') {
             flashCell(row, col);
-            throw("Error: Invalid Placement!");
+            console.log("Error: Invalid Placement!");
+            return false;
         }
 
         reqdCell.textContent = symbol;
         reqdCell.style.color = colour;
+        return true;
     }
 
     const setBorderColour = (colour) => {
@@ -187,6 +202,18 @@ const displayController = (() => {
         turnDisplay.style.color = colour;
     }
 
+    const displayWin = (winner, colour) => {
+        const winMsg = `Player ${winner} Won!!!`;
+        turnDisplay.textContent = winMsg;
+        turnDisplay.style.color = colour;
+    }
+
+    const displayDraw = (colour) => {
+        const drawMsg = `Game End. Both Players Draw...`;
+        turnDisplay.textContent = drawMsg;
+        turnDisplay.style.color = colour;
+    }
+
     const clearBoard = () => {
         cells.forEach((cell) => {
             cell.textContent = '';
@@ -194,15 +221,30 @@ const displayController = (() => {
         })
     }
 
+    const resetDisplay = () => {
+        inPlay = true;
+        gameWin = false;
+        gameDraw = false;
+        gameController.reset();
+        clearBoard();
+        setBorderColour(P1COLOUR);
+        updateTurnDisplay(gameController.whoAmI().name, P1COLOUR);
+    }
+
 
     // Public functions
     const setEventListeners = () => {
+        // events for cells
         cells.forEach((cell) => {
             const index = +cell.getAttribute("data-id");
             const rowIndex = Math.floor(index / 3);
             const colIndex = index % 3;
 
             cell.addEventListener('click', () => {
+                if (!inPlay) {
+                    return;
+                }
+
                 const player = gameController.whoAmI()
 
                 const playerSymbol = player.playerType;
@@ -213,17 +255,35 @@ const displayController = (() => {
                 const newColour = colour === P1COLOUR ? P2COLOUR : P1COLOUR;
                 setBorderColour(newColour);
 
-                gameController.playMove(rowIndex, colIndex);
+                const { win, draw } = gameController.playMove(rowIndex, colIndex);
+                gameWin = win;
+                gameDraw = draw;
 
-                const newPlayer = gameController.whoAmI();
-                updateTurnDisplay(newPlayer.name, newColour);
+                if (gameWin) {
+                    inPlay = false;
+                    displayWin(player.name, WINCLR);
+                }
+                else if (gameDraw) {
+                    inPlay = false;
+                    displayDraw(DRAWCLR);
+                }
+                else {
+                    // game continues
+                    const newPlayer = gameController.whoAmI();
+                    updateTurnDisplay(newPlayer.name, newColour);
+                }
             })
+        })
+
+        // Reset button
+        const resetBtn = document.getElementById("reset-btn");
+        resetBtn.addEventListener('click', () => {
+            resetDisplay();
         })
     }
 
 
     return {
-        clearBoard,
         setEventListeners,
     }
 })();

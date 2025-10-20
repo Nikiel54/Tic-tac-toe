@@ -2,6 +2,7 @@
     --screen-background: #000000;
     --title-colour: #FF33CC;
     --start-border-clr: #8A2BE2;
+    --reset-colour: #FF073A;
 
     box-sizing: border-box;
     font-family: "Orbitron", "Courier New", "Times New Roman"
@@ -17,7 +18,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 600px;
+    height: 700px;
     background-color: var(--screen-background);
 }
 
@@ -65,4 +66,24 @@ body {
 
 .flash {
   animation: flash-red 0.3s ease;
+}
+
+@keyframes pulse-reset {
+  0%, 100% { box-shadow: 0 0 3px var(--reset-colour); }
+  50%      { box-shadow: 0 0 5px var(--reset-colour), 0 0 8px var(--reset-colour); }
+}
+
+#reset-btn {
+    width: 100px;
+    height: 50px;
+    text-align: center;
+    padding: 10px;
+    margin: 20px;
+    background-color: transparent;
+    border: 2px solid var(--reset-colour);
+    color: var(--reset-colour);
+    border-radius: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    animation: pulse-reset 2s infinite alternate;
 }

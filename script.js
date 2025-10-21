@@ -1,4 +1,6 @@
-// Game logic
+// Internal game logic
+
+// COLOURS
 const P1COLOUR = "#8A2BE2";
 const P2COLOUR = "#00FFFF";
 const WINCLR = "#FFD700";
